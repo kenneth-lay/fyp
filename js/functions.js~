@@ -1,0 +1,363 @@
+function AddEvents()
+{
+	navigationDOM = document.getElementsByClassName("navigator");
+	for (i = 0; i < navigationDOM.length; i++)
+	{
+		navigationDOM[i].addEventListener("mousedown", SetMouseDown, false);
+		navigationDOM[i].addEventListener("mouseup", SetMouseUp, false);
+	}
+	resetButtonDOM = document.getElementById("resetButton");
+	resetButtonDOM.removeEventListener("mousedown", SetMouseDown, false);
+	resetButtonDOM.removeEventListener("mouseup", SetMouseUp, false);
+	document.addEventListener("keydown", DetectKey, false);
+}
+
+function AddOverlays()
+{
+	navigatorDiv = document.createElement("div");
+	navigatorRectangle = new Seadragon.Rect
+	(   
+		0, 0,
+		0.5, panoramaHeight/panoramaWidth
+	);
+	navigatorDiv.className = "overlay";
+	panoramaNavigator.drawer.addOverlay(navigatorDiv, navigatorRectangle);
+}
+
+function Init() 
+{	
+	currentPanorama = "http://static.seadragon.com/content/misc/carina-nebula.dzi";
+    panorama = new Seadragon.Viewer("panorama");
+	panoramaNavigator = new Seadragon.Viewer("panoramaNavigator");
+	panoramaWidth = 29566;
+	panoramaHeight = 14321;
+    panorama.openDzi
+    ( 
+    	{
+    		url: currentPanorama,
+    		width: panoramaWidth,
+    		height: panoramaHeight,
+    		tileSize: 254,
+    		tileOverlap: 1,
+    		tileFormat:"jpg"
+		}
+	);
+	panoramaNavigator.openDzi
+    ( 
+    	{
+    		url: currentPanorama,
+    		width: panoramaWidth,
+    		height: panoramaHeight,
+    		tileSize: 254,
+    		tileOverlap: 1,
+    		tileFormat:"jpg"
+		}
+	);
+	imageWidth = 29566;
+	maxDegree = MaxDegree(2 * imageWidth/viewportWidth, 1.07385, 0);
+	zoomSliderOriginalPosition = parseInt($('#zoomslider').css('margin-left'));
+	zoomSliderBarWidth = parseInt($('#zoombar').css('width'));
+	zoomSliderWidth = parseInt($('#zoomslider').css('width'));
+	panoramaNavigator.addEventListener("open", AddOverlays);
+	AddEvents();
+}
+
+function MaxDegree(num, pow, start)
+{
+	if (num/pow > 1.07385)
+	{
+		if (num <= 1.07385)
+		{
+			return start;
+		}
+		else
+		{
+			return MaxDegree(num/pow, pow, start + 1);
+		}
+	}
+	else
+	{
+		return start;
+	}
+}
+
+function KeyReset()
+{
+	keyCode = -1;
+	keyCode2 = -1;
+	keyCurrent = 1;
+	if (keyStatus == 0)
+	{
+		keyDown = keyDown - 1;
+	}
+	else
+	{
+		keyStatus = 0;
+		keyPress = keyPress - 1;
+	}
+	keyDiagonal = 0;
+}
+
+function Pan(type)
+{
+	buttonFocus = type;
+}
+
+function PanZoom(type) 
+{
+	var deltaPixel = null;
+	var deltaPixelHold = null;
+    if (!panorama.isOpen()) 
+    {
+		return;
+    }
+    if (type == 1 && !keyDiagonal)
+    {
+    	deltaPixel = new Seadragon.Point(256,0);
+    	deltaPixelHold = new Seadragon.Point(32,0);
+    }
+    else if (type == 2 && !keyDiagonal)
+    {
+    	deltaPixel = new Seadragon.Point(-256,0);
+    	deltaPixelHold = new Seadragon.Point(-32,0);
+    }
+    else if (type == 3 && !keyDiagonal)
+    {
+    	deltaPixel = new Seadragon.Point(0,-256);
+    	deltaPixelHold = new Seadragon.Point(0,-32);
+    }
+    else if (type == 4 && !keyDiagonal)
+    {
+    	deltaPixel = new Seadragon.Point(0,256);
+    	deltaPixelHold = new Seadragon.Point(0,32);
+    }
+    else if (type == 7)
+    {	
+    	deltaPixel = new Seadragon.Point(-256,-256);
+    	deltaPixelHold = new Seadragon.Point(-32,-32);
+    }
+    else if (type == 8)
+    {
+    	deltaPixel = new Seadragon.Point(256,-256);
+    	deltaPixelHold = new Seadragon.Point(32,-32);
+    }
+    else if (type == 9)
+    {
+    	deltaPixel = new Seadragon.Point(256,256);
+    	deltaPixelHold = new Seadragon.Point(32,32);
+    }
+    else if (type == 10)
+    {
+    	deltaPixel = new Seadragon.Point(-256,256);
+    	deltaPixelHold = new Seadragon.Point(-32,32);
+    }
+    if (type < 5 || (type > 6 && type < 11))
+    {
+    	if ((!mouseClick && (keyPress > 0)) || (mouseClick && (keyPress < 1)))
+        {
+        	mouseClick = 0;
+        	keyStatus = 0;
+        	if (type > 6 && type < 11)
+        	{
+        		keyPress = keyPress - 2;
+                if (keyDown == 0)
+                {
+                    keyCode = -1;
+                    keyCode2 = -1;
+                }
+        		keyCurrent = 1;
+        	}
+        	else
+        	{
+        		keyPress = keyPress - 1;
+        		if (keyCurrent == 1)
+        		{
+        			keyCode = -1;
+        		}
+        		else
+        		{
+        			keyCurrent = 1;
+        			keyCode2 = -1;
+        		}
+        	}
+    		panorama.viewport.panBy(panorama.viewport.deltaPointsFromPixels(deltaPixel));
+    		if (keyPressRepeat > 0)
+    		{
+    			while (keyPressRepeat > 0)
+    			{
+    				panorama.viewport.panBy(panorama.viewport.deltaPointsFromPixels(deltaPixel));
+    				keyPressRepeat = keyPressRepeat - 1;
+    			}
+    			keyJustPressed = -1;
+    			keyJustPressed2 = -1;
+    		}
+    	}
+    	else if ((!mouseDown && (keyDown > 0)) || (mouseDown && (keyDown < 1)))
+    	{
+    		panorama.viewport.panBy(panorama.viewport.deltaPointsFromPixels(deltaPixelHold));
+    		var timeOut = 100;
+    		if (keyNotUp > -1)
+    		{
+    			switch(keyNotUp)
+				{	
+					case 32:
+						type = 11;
+						break;
+					case 37:
+						type = 2;
+						break;
+					case 38:
+						type = 3;
+						break;
+					case 39:
+						type = 1;
+						break;
+					case 40:
+						type = 4;
+						break;
+					case 68:
+						type = 6;
+						break;
+					case 70:
+						type = 5;
+						break;
+					default:
+						KeyReset();
+						break;
+				}
+    		}
+    		window.setTimeout	/* click and hold */
+        	(
+        		function()
+        		{
+        			PanZoom(type);
+        		},
+        		timeOut
+        	);
+    	}
+    }
+    else if (type == 5 || type == 6)
+    {
+        if ((!mouseClick && keyPress > 0) || (mouseClick && keyPress < 1))
+        {
+        	mouseClick = 0;
+        	keyPress = 0;
+        	keyCode = -1;        	
+        	if (type == 5)
+        	{
+        		panorama.viewport.zoomBy(2.1);
+        	}
+        	else
+        	{
+        		if (panorama.viewport.getZoom()/2.1 >= 1)
+        		{
+        			panorama.viewport.zoomBy(1/2.1);
+        		}
+        		else
+        		{
+        			panorama.viewport.zoomTo(1);
+        		}
+        	}
+        	UpdateZoomBar(0);
+        }
+        else if ((!mouseDown && keyDown > 0) || (mouseDown && keyDown < 1))
+        {
+        	if (type == 5)
+        	{
+        		panorama.viewport.zoomBy(1.004897959183);
+        	}
+        	else
+        	{
+        		panorama.viewport.zoomBy(1/1.004897959183);
+        	}
+        	UpdateZoomBar(1);
+        	window.setTimeout	/* click and hold */
+        	(
+        		function()
+        		{
+        			PanZoom(type);
+        		},
+        		0
+        	);
+        }
+    }
+    else
+    {
+    	KeyReset();
+    	panorama.viewport.goHome();
+		UpdateZoomBar(0);    
+    }
+    panorama.viewport.ensureVisible();
+}
+
+function Reset()
+{
+	PanZoom(11);
+}
+
+function SetMouseDown()
+{
+	mouseUp = 0;
+	window.setTimeout
+	(
+		function()
+		{
+			if (!mouseUp)
+			{
+				mouseDown = 1;
+			}
+			else
+			{
+				mouseClick = 1;
+			}
+			if (buttonFocus > 0)
+			{	
+				PanZoom(buttonFocus);
+			}
+		},
+		250
+	);
+}
+
+function SetMouseUp()
+{
+	mouseUp = 1;
+	mouseDown = 0;
+}
+
+function UpdateZoomBar(type)
+{
+	if (type == 0)
+	{
+		window.setTimeout
+    	(
+    	    function()
+    	    {
+    	    	var currentDegree = MaxDegree(panorama.viewport.getZoom(), 1.07385, 0);
+    	    	$('#zoomlevel').animate({width: Math.round(zoomBarWidth * (currentDegree / maxDegree))});
+				zoomSliderCurrentPosition = zoomSliderOriginalPosition + Math.round(zoomBarWidth * (currentDegree / maxDegree));
+    	    	$('#zoomslider').animate({marginLeft: zoomSliderCurrentPosition});
+			},
+    	    200
+    	);
+    }
+    else
+    {
+    	window.setTimeout
+    	(
+    	    function()
+    	    {
+    	    	var currentDegree = MaxDegree(panorama.viewport.getZoom(), 1.07385, 0);
+    	    	$('#zoomlevel').css('width', Math.round(zoomBarWidth * (currentDegree / maxDegree)));
+				zoomSliderCurrentPosition = zoomSliderOriginalPosition + Math.round(zoomBarWidth * (currentDegree / maxDegree));
+    	    	$('#zoomslider').css('margin-left', zoomSliderCurrentPosition);
+    	    },
+    	    200
+    	);
+    }
+}
+
+function Zoom(type)
+{
+	buttonFocus = 4 + type;
+}

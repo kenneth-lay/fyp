@@ -1,0 +1,138 @@
+.annotation-description
+{
+	margin: 0px 0px 0px 0px;
+	font-size: 12px;
+	text-align: justify;
+}
+
+.annotation-subtitle
+{
+	margin: 0px 0px 9px 0px;
+	font-size: 15px;
+}
+
+.annotation-title
+{
+	margin: 0px 0px -3px 0px;
+	font-size: 24px;
+	font-family: 'PTSansRegular';
+}
+
+.annotation-weblink
+{
+	display: block;
+	border: 1px solid #3366CC;
+	background-color: #003399;
+	padding: 3px 10px 3px 10px;
+	width: auto;
+	font-size: 10px;
+	color: #99CCFF;
+	text-decoration: none;
+	margin: 5px 0px 0px 0px;
+	float: right;
+}
+
+.annotation-weblink:hover
+{
+	background-color: #000066;
+	color: #9999FF;
+	border: 1px solid #333399;
+	text-decoration: none;
+}
+
+b
+{
+	font-family: 'PTSansBold';
+}
+
+body
+{
+	font-family: 'PTSansRegular';
+}
+
+.heading .close-screen
+{
+	text-decoration: none;
+	font-size: 20px;
+	font-weight: bold;
+	color: #303030;
+	text-shadow: 0px -1px 0px #101010;
+}
+
+.heading .close-screen:hover
+{
+	color: #CC3300;
+	text-shadow: 0px -1px 0px #660000;
+}
+
+.selection-detail
+{
+	text-decoration: none;
+	color: #CC3300;
+	font-family: 'PTSansRegular';
+	font-weight: normal;
+	text-shadow: 0px 0px 0px #303030;
+	display: none;
+}
+
+.selection-separator
+{
+	text-decoration: none;
+	color: #009933;
+	font-family: 'PTSansRegular';
+	font-weight: normal;
+	text-shadow: 0px 0px 0px #303030;
+	display: none;
+}
+
+#nvg-overview-title
+{
+	font-size: 11px;
+	color: #FFCC00;
+	position: absolute;
+	z-index: 10006;
+}
+
+.blackfont
+{
+	color: black;
+	font-weight: bold;
+}
+
+#title-line-1
+{
+	font-family: 'Montserrat';
+	color: #909090;
+	font-size: 37.5px;
+	font-weight: bold;
+	text-align: right;
+	padding: 15px 20px 0px 0px;
+	margin: 3px 0px -20px 0px;
+	text-shadow: -1px -1px 0px #202020;
+}
+
+#title-line-2
+{
+	font-family: 'Montserrat';
+	color: #909090;
+	font-size: 22.5px;
+	font-weight: bold;
+	text-align: right;
+	padding: 10px 14px 0px 0px;
+	margin: 0px 0px -18.5px 0px;
+	letter-spacing: 4.5px;
+	text-shadow: -1px -1px 0px #202020;
+}
+
+#title-line-3
+{
+	font-family: 'Montserrat';
+	color: #909090;
+	font-size: 22.5px;
+	font-weight: bold;
+	text-align: right;
+	padding: 12px 16px 0px 0px;
+	margin: 0px 0px 0px 0px;
+	letter-spacing: 1px;
+	text-shadow: -1px -1px 0px #202020;
+}

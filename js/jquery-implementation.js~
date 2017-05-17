@@ -1,0 +1,439 @@
+$(document).ready
+(
+	function()
+	{
+		$(document).bind
+		(
+			"keydown", 
+			function(e)
+			{	
+				var deltaTime = 0;
+				var currentDate = new Date();
+				if (panoramaFocus)
+				{
+					if (keyJustPressed == -1 || keyJustPressed == e.keyCode || keyJustPressed2 == e.keyCode)
+					{
+						deltaTime = currentDate.getTime() - keyLastPressed;
+						keyLastPressed = currentDate.getTime();
+						if ((keyJustPressed == e.keyCode || keyJustPressed2 == e.keyCode) && deltaTime < 252)
+						{
+							keyPressRepeat = keyPressRepeat + 1;
+						}
+						if (keyJustPressed == -1)
+						{
+							keyJustPressed = e.keyCode;
+						}
+						else if (deltaTime < 52)
+						{
+							keyJustPressed2 = e.keyCode;
+						}
+					}
+					if (keyCodeList.length < 2)
+					{
+						if (keyCode == -1 && keyCurrent == 1)
+						{	
+							keyCode = e.keyCode;
+							if (keyCodeList.indexOf(e.keyCode) == -1)
+							{
+								keyCodeList.push(keyCode);
+								keyNew = 1;
+								keyPress = 0;
+							}
+							else
+							{	
+								keyNew = 0;
+							}
+							keyCurrent = 1;
+						}
+						else
+						{	
+							if (keyCode != e.keyCode && keyCode != -1)
+							{
+								keyCode2 = e.keyCode;
+								keyCurrent = 2;
+								keyCodeList.push(keyCode2);
+								keyNew = 1;
+								keyPress = 0;
+								keyNotUp = -1;
+							}
+							else if (keyCode == -1 && keyCode2 > -1 && keyCode2 != e.keyCode)
+							{
+								keyCode = e.keyCode;
+								keyNew = 1;
+								keyCurrent = 1;
+								keyPress = 0;
+								keyNotUp = -1;
+								keyCodeList.push(keyCode);
+							}
+							else
+							{
+								keyNew = 0;
+							}
+						}
+						if (keyDown < 2 && keyPress < 2 && keyNew)		/* Semaphores */
+						{
+							window.setTimeout
+							(	
+								function()
+								{
+									if (keyCodeList.indexOf(e.keyCode) > -1)
+									{
+										keyStatus = 0;
+										if (keyNotUp == -1)
+										{
+											keyDown = keyDown + 1;
+										}
+										else if ((keyCode > -1 && keyCode2 == -1 && keyDown < 1) || (keyCode == -1 && keyCode2 > -1 && keyDown < 1))
+										{
+											keyDown = 1;
+										}
+										else if (keyCode > -1 && keyCode2 > -1)
+										{
+											keyDown = 2;
+										}
+                                        keyStatus = 0;
+									}
+									else
+									{
+										keyStatus = 1;
+										keyPress = keyPress + 1;
+                                        if (keyCode == -1 && keyCode2 != e.keyCode)
+                                        {
+                                            keyCode = e.keyCode;
+                                        }
+                                        else if (keyCode2 == -1 && keyCode != e.keyCode)
+                                        {
+                                            keyCode2 = e.keyCode;
+                                        }
+									}
+									if (((keyCode > -1 && keyCode2 == -1) || (keyCode == -1 && keyCode2 > -1)) && !keyDiagonal)
+									{
+										var kcode = -1;
+										if (keyCode == -1)
+										{
+											kcode = keyCode2;
+										}
+										else
+										{
+											kcode = keyCode;
+										}
+										switch(kcode)
+										{	
+											case 32:
+												PanZoom(11);
+												break;
+											case 37:
+												PanZoom(2);
+												break;
+											case 38:
+												PanZoom(3);
+												break;
+											case 39:
+												PanZoom(1);
+												break;
+											case 40:
+												PanZoom(4);
+												break;
+											case 68:
+												PanZoom(6);
+												break;
+											case 70:
+												PanZoom(5);
+												break;
+											default:
+												KeyReset();
+												break;
+										}
+									}
+									else if (keyCode > -1 && keyCode2 > -1)
+									{
+										keyDiagonal = 1;
+										if ((keyCode == 37 && keyCode2 == 38) || (keyCode == 38 && keyCode2 == 37))
+										{
+											PanZoom(7);
+										}
+										else if ((keyCode == 38 && keyCode2 == 39) || (keyCode == 39 && keyCode2 == 38))
+										{
+											PanZoom(8);
+										}
+										else if ((keyCode == 39 && keyCode2 == 40) || (keyCode == 40 && keyCode2 == 39))
+										{
+											PanZoom(9);
+										}
+										else if ((keyCode == 37 && keyCode2 == 40) || (keyCode == 40 && keyCode2 == 37))
+										{
+											PanZoom(10);
+										}
+										else
+										{
+											KeyReset();
+										}
+									}
+								},
+								250
+							);
+						}
+					}
+				}
+    		}
+    	);
+		$(document).bind
+		(
+			"keyup", 
+			function(e)
+			{
+				keyNew = 1;
+				if (keyStatus == 0)
+				{	
+					if (keyDown > 0)
+					{
+						keyDown = keyDown - 1;
+						if (keyCode == e.keyCode)
+						{
+							keyNotUp = keyCode2;
+							keyCode = -1;
+							keyCurrent = 2;
+						}
+						else if (keyCode2 == e.keyCode)
+						{
+							keyNotUp = keyCode;
+							keyCode2 = -1;
+							keyCurrent = 1;
+						}
+						if (keyPressRepeat > 0)
+    					{
+    						keyPressRepeat = 0;
+    					}
+					}
+				}
+				keyCodeList.splice(keyCodeList.indexOf(e.keyCode),1);
+				if (keyCodeList.length > 0)
+				{
+					keyCode2 = -1;
+					currentDate = new Date();
+					deltaTime = currentDate.getTime() - keyLastReleased;
+					keyLastReleased = currentDate.getTime();
+					keyDown = 1;
+					window.setTimeout
+					(
+						function()
+						{
+							if (keyCodeList.length > 0)
+							{
+								keyCode = keyCodeList.pop();
+								keyCodeList.push(keyCode);
+								keyPress = 0;
+								keyDiagonal = 0;
+								switch(keyCode)
+								{	
+									case 32:
+										PanZoom(11);
+										break;
+									case 37:
+										PanZoom(2);
+										break;
+									case 38:
+										PanZoom(3);
+										break;
+									case 39:
+										PanZoom(1);
+										break;
+									case 40:
+										PanZoom(4);
+										break;
+									case 68:
+										PanZoom(6);
+										break;
+									case 70:
+										PanZoom(5);
+										break;
+									default:
+										KeyReset();
+										break;
+								}
+							}
+							else
+							{
+								keyDown = 0;
+							}
+						},
+						252
+					);
+				}
+				keyDiagonal = 0;
+				if (keyDown == 0 || keyCodeList.length == 0)
+				{
+					keyNotUp = -1;
+					keyNew = 1;
+					keyCodeList = [];
+					keyCurrent = 1;
+					keyCode = -1;
+					keyCode2 = -1;
+				}
+    		}
+    	);
+    	$(document).mousedown
+		(
+			function()
+			{
+				if (panoramaEnter == 1)
+				{
+					panoramaFocus = 1;
+				}
+				else
+				{
+					panoramaFocus = 0;
+					keyDown = 0;
+					keyPress = 0;
+				}
+			}
+		);
+		
+		/* http://stackoverflow.com/questions/7154967/jquery-detect-scrolldown */
+		/* Firefox */
+ 		$(document).bind
+ 		(
+ 			'DOMMouseScroll', 
+ 			function()
+ 			{
+ 				if (panoramaEnter == 1)
+				{
+					panoramaFocus = 1;
+				}
+				UpdateZoomBar(1);
+				var currentDegree = MaxDegree(panorama.viewport.getZoom(), 1.07385, 0);
+				navigatorRectangle = new Seadragon.Rect
+				(   
+					1, panoramaHeight/(panoramaWidth * 2),
+					1 * (1 - currentDegree / maxDegree), (panoramaHeight/panoramaWidth) * (1 - currentDegree / maxDegree)
+				);
+				panoramaNavigator.drawer.updateOverlay(navigatorDiv, navigatorRectangle);
+     			return false;
+     		}
+ 		);
+
+		/* IE, Opera, Safari */
+		$(document).bind
+ 		(
+ 			'mousewheel', 
+ 			function()
+ 			{
+ 				if (panoramaEnter == 1)
+				{
+					panoramaFocus = 1;
+				}
+				UpdateZoomBar(1);
+				var currentDegree = MaxDegree(panorama.viewport.getZoom(), 1.07385, 0);
+				navigatorRectangle = new Seadragon.Rect
+				(   
+					0, 0,
+					1 * (1 - currentDegree / maxDegree), (panoramaHeight/panoramaWidth) * (1 - currentDegree / maxDegree)
+				);
+				panoramaNavigator.drawer.updateOverlay(navigatorDiv, navigatorRectangle);
+     			return false;
+     		}
+ 		);
+
+		$(document).mouseup
+		(
+			function()
+			{
+				if (zoomSliderOn)
+				{
+					zoomSliderOn = 0;
+					zoomSliderInitial = -1;
+				}
+			}
+		);
+		
+		$(document).mousemove
+		(
+			function(e)
+			{
+		    	var deltaSliderMovement = e.pageX - zoomSliderInitial;
+				var sliderLimiter = zoomSliderCurrentPosition + deltaSliderMovement + zoomSliderOriginalPosition + zoomSliderBarWidth + zoomSliderWidth * 2;
+				if ((sliderLimiter < 1 && sliderLimiter > zoomSliderOriginalPosition + zoomSliderWidth - 1) && zoomSliderOn)
+				{
+					$('#ktrigger').text(zoomBarWidth + zoomSliderCurrentPosition + deltaSliderMovement + 10);
+					$('#zoomslider').css('margin-left', zoomSliderCurrentPosition + deltaSliderMovement);
+					var W = zoomBarWidth + zoomSliderCurrentPosition + deltaSliderMovement + 10;
+					$('#zoomlevel').css('width', Math.round(W));
+					var currentDegree = Math.round(W * maxDegree / zoomBarWidth);
+					var zoomDegree = 1;
+					for (i = 0; i < currentDegree; i++)
+					{
+						if (i < currentDegree - 1)
+						{
+							zoomDegree = zoomDegree * 1.07385;
+						}
+						else
+						{
+							zoomDegree = zoomDegree * 1.2;
+						}
+					}
+					panorama.viewport.zoomTo(zoomDegree);
+				}
+			}
+		);
+		
+		$('#panoramaContainer').mouseenter
+		(
+			function()
+			{
+				panoramaEnter = 1;
+			}
+		);
+		$('#panoramaContainer').mouseleave
+		(	
+			function()
+			{
+				panoramaEnter = 0;
+			}
+		);
+		
+		$('#panoramaNavigator').mouseover
+		(
+			function()
+			{
+				panoramaNavigatorEnter = true;
+			}
+		);
+		
+		$('#panoramaNavigator').mouseleave
+		(
+			function()
+			{
+				panoramaNavigatorEnter = false;
+			}
+		);
+		
+		$('#zoomslider').mousedown
+		(
+			function(e)
+			{
+				zoomSliderOn = 1;
+				if (zoomSliderInitial == -1)
+				{
+					zoomSliderInitial = e.pageX;
+					zoomSliderCurrentPosition = parseInt($('#zoomslider').css('margin-left'));
+				}
+			}
+		);
+		
+		$('#zoomslider').mouseout
+		(
+			function()
+			{
+				$('#zoomslider').css('background-color', '#CC3300');
+			}
+		);
+		
+		$('#zoomslider').mouseover
+		(
+			function()
+			{
+				$('#zoomslider').css('background-color', '#FF6600');
+			}
+		);
+ 	}
+);
